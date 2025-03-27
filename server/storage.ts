@@ -1,0 +1,152 @@
+import { documents, type Document, type InsertDocument, type UpdateDocument, type ProcessingResult, users, type User, type InsertUser } from "@shared/schema";
+import { nanoid } from "nanoid";
+
+// Define the interface with necessary CRUD methods
+export interface IStorage {
+  // User methods
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  
+  // Document methods
+  getDocument(id: number): Promise<Document | undefined>;
+  getAllDocuments(): Promise<Document[]>;
+  createDocument(document: InsertDocument): Promise<Document>;
+  updateDocument(id: number, data: UpdateDocument): Promise<Document | undefined>;
+  deleteDocument(id: number): Promise<boolean>;
+  
+  // OCR Processing methods
+  processDocument(id: number): Promise<ProcessingResult | undefined>;
+}
+
+export class MemStorage implements IStorage {
+  private users: Map<number, User>;
+  private documents: Map<number, Document>;
+  private currentUserId: number;
+  private currentDocumentId: number;
+
+  constructor() {
+    this.users = new Map();
+    this.documents = new Map();
+    this.currentUserId = 1;
+    this.currentDocumentId = 1;
+  }
+
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.username === username,
+    );
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const id = this.currentUserId++;
+    const user: User = { ...insertUser, id };
+    this.users.set(id, user);
+    return user;
+  }
+
+  // Document methods
+  async getDocument(id: number): Promise<Document | undefined> {
+    return this.documents.get(id);
+  }
+
+  async getAllDocuments(): Promise<Document[]> {
+    return Array.from(this.documents.values());
+  }
+
+  async createDocument(document: InsertDocument): Promise<Document> {
+    const id = this.currentDocumentId++;
+    const newDocument: Document = { 
+      ...document, 
+      id,
+      originalText: null, 
+      processedText: null, 
+      processingSummary: null 
+    };
+    this.documents.set(id, newDocument);
+    return newDocument;
+  }
+
+  async updateDocument(id: number, data: UpdateDocument): Promise<Document | undefined> {
+    const document = this.documents.get(id);
+    if (!document) {
+      return undefined;
+    }
+    
+    const updatedDocument = { ...document, ...data };
+    this.documents.set(id, updatedDocument);
+    return updatedDocument;
+  }
+
+  async deleteDocument(id: number): Promise<boolean> {
+    return this.documents.delete(id);
+  }
+
+  // OCR Processing methods
+  async processDocument(id: number): Promise<ProcessingResult | undefined> {
+    const document = this.documents.get(id);
+    if (!document) {
+      return undefined;
+    }
+
+    // This would normally interact with actual OCR services
+    // For now, we'll simulate the process with sample Tamil text
+    
+    // Create a sample processing result
+    const stages = [
+      {
+        name: "Image Enhancement",
+        status: "completed" as const,
+        progress: 100,
+        timeMs: 450 + Math.floor(Math.random() * 200),
+      },
+      {
+        name: "Text Recognition",
+        status: "completed" as const,
+        progress: 100,
+        timeMs: 980 + Math.floor(Math.random() * 300),
+      },
+      {
+        name: "Post-processing",
+        status: "completed" as const,
+        progress: 100,
+        timeMs: 320 + Math.floor(Math.random() * 150),
+      },
+    ];
+
+    // Sample Tamil texts that would normally be the result of OCR
+    const tamilTexts = [
+      "பழந்தமிழ் இலக்கியங்களில் ஒன்றான சிலப்பதிகாரம் கண்ணகி மற்றும் கோவலன் கதையை விவரிக்கிறது. இது இளங்கோவடிகளால் எழுதப்பட்டது.",
+      "மன்னன் சோழன் காலத்தில் தஞ்சாவூரில் கட்டப்பட்ட பிரகதீஸ்வரர் கோயில் சிறந்த கட்டிடக்கலைக்கு ஒரு உதாரணமாகும். இக்கோயில் யுனெஸ்கோவால் உலக பாரம்பரிய சின்னமாக அறிவிக்கப்பட்டுள்ளது.",
+      "பாண்டிய மன்னர்கள் வரலாறு தமிழகத்தின் தென்பகுதியில் சிறப்புற்று விளங்கியது. இவர்கள் ஆட்சியில் இலக்கியம், கலை, கட்டிடம் என பல துறைகள் வளர்ந்தன. குறிப்பாக சங்க இலக்கியங்கள் பெருமளவில் தோன்றின."
+    ];
+
+    // Select a text sample for the result
+    const extractedText = tamilTexts[Math.floor(Math.random() * tamilTexts.length)];
+    
+    const result: ProcessingResult = {
+      documentId: id,
+      extractedText,
+      confidence: 85 + Math.floor(Math.random() * 10),
+      processingTime: stages.reduce((sum, stage) => sum + stage.timeMs, 0),
+      charCount: extractedText.length,
+      stages,
+    };
+
+    // Update the document with the processing results
+    await this.updateDocument(id, {
+      status: "processed",
+      processedText: extractedText,
+      processingSummary: result
+    });
+
+    return result;
+  }
+}
+
+export const storage = new MemStorage();
