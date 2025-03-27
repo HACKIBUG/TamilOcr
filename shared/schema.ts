@@ -42,7 +42,9 @@ export const insertDocumentSchema = createInsertSchema(documents)
     confidenceThreshold: z.number().min(0).max(100).default(80),
   });
 
-export const updateDocumentSchema = insertDocumentSchema.partial();
+export const updateDocumentSchema = createInsertSchema(documents)
+  .omit({ id: true })
+  .partial();
 
 export const processingResultSchema = z.object({
   documentId: z.number(),

@@ -1,5 +1,6 @@
 import { documents, type Document, type InsertDocument, type UpdateDocument, type ProcessingResult, users, type User, type InsertUser } from "@shared/schema";
-import { nanoid } from "nanoid";
+import { eq } from "drizzle-orm";
+import { db } from "./db";
 
 // Define the interface with necessary CRUD methods
 export interface IStorage {
@@ -19,6 +20,121 @@ export interface IStorage {
   processDocument(id: number): Promise<ProcessingResult | undefined>;
 }
 
+export class PostgresStorage implements IStorage {
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id));
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.username, username));
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
+  }
+
+  // Document methods
+  async getDocument(id: number): Promise<Document | undefined> {
+    const result = await db.select().from(documents).where(eq(documents.id, id));
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async getAllDocuments(): Promise<Document[]> {
+    return await db.select().from(documents);
+  }
+
+  async createDocument(document: InsertDocument): Promise<Document> {
+    // Ensure status is set
+    const docWithStatus = {
+      ...document,
+      status: document.status || "uploaded"
+    };
+    
+    const result = await db.insert(documents).values(docWithStatus).returning();
+    return result[0];
+  }
+
+  async updateDocument(id: number, data: UpdateDocument): Promise<Document | undefined> {
+    const result = await db.update(documents)
+      .set(data)
+      .where(eq(documents.id, id))
+      .returning();
+      
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async deleteDocument(id: number): Promise<boolean> {
+    const result = await db.delete(documents).where(eq(documents.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // OCR Processing methods
+  async processDocument(id: number): Promise<ProcessingResult | undefined> {
+    const document = await this.getDocument(id);
+    if (!document) {
+      return undefined;
+    }
+
+    // This would normally interact with actual OCR services
+    // For now, we'll simulate the process with sample Tamil text
+    
+    // Create a sample processing result
+    const stages = [
+      {
+        name: "Image Enhancement",
+        status: "completed" as const,
+        progress: 100,
+        timeMs: 450 + Math.floor(Math.random() * 200),
+      },
+      {
+        name: "Text Recognition",
+        status: "completed" as const,
+        progress: 100,
+        timeMs: 980 + Math.floor(Math.random() * 300),
+      },
+      {
+        name: "Post-processing",
+        status: "completed" as const,
+        progress: 100,
+        timeMs: 320 + Math.floor(Math.random() * 150),
+      },
+    ];
+
+    // Sample Tamil texts that would normally be the result of OCR
+    const tamilTexts = [
+      "பழந்தமிழ் இலக்கியங்களில் ஒன்றான சிலப்பதிகாரம் கண்ணகி மற்றும் கோவலன் கதையை விவரிக்கிறது. இது இளங்கோவடிகளால் எழுதப்பட்டது.",
+      "மன்னன் சோழன் காலத்தில் தஞ்சாவூரில் கட்டப்பட்ட பிரகதீஸ்வரர் கோயில் சிறந்த கட்டிடக்கலைக்கு ஒரு உதாரணமாகும். இக்கோயில் யுனெஸ்கோவால் உலக பாரம்பரிய சின்னமாக அறிவிக்கப்பட்டுள்ளது.",
+      "பாண்டிய மன்னர்கள் வரலாறு தமிழகத்தின் தென்பகுதியில் சிறப்புற்று விளங்கியது. இவர்கள் ஆட்சியில் இலக்கியம், கலை, கட்டிடம் என பல துறைகள் வளர்ந்தன. குறிப்பாக சங்க இலக்கியங்கள் பெருமளவில் தோன்றின."
+    ];
+
+    // Select a text sample for the result
+    const extractedText = tamilTexts[Math.floor(Math.random() * tamilTexts.length)];
+    
+    const result: ProcessingResult = {
+      documentId: id,
+      extractedText,
+      confidence: 85 + Math.floor(Math.random() * 10),
+      processingTime: stages.reduce((sum, stage) => sum + stage.timeMs, 0),
+      charCount: extractedText.length,
+      stages,
+    };
+
+    // Update the document with the processing results
+    await this.updateDocument(id, {
+      status: "processed",
+      processedText: extractedText,
+      processingSummary: result
+    });
+
+    return result;
+  }
+}
+
+// Memory storage implementation (for fallback or testing)
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private documents: Map<number, Document>;
@@ -66,7 +182,8 @@ export class MemStorage implements IStorage {
       id,
       originalText: null, 
       processedText: null, 
-      processingSummary: null 
+      processingSummary: null,
+      status: document.status || "uploaded"
     };
     this.documents.set(id, newDocument);
     return newDocument;
@@ -149,4 +266,5 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Export the PostgreSQL storage implementation
+export const storage = new PostgresStorage();
