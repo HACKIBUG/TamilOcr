@@ -104,7 +104,7 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <p className="font-medium">Email</p>
-                    <p className="text-dark-600 dark:text-gray-400 text-sm">contact@tamilocr.org</p>
+                    <p className="text-dark-600 dark:text-gray-400 text-sm">sakthivesurekha@gmail.com</p>
                   </div>
                 </div>
                 
@@ -115,16 +115,6 @@ export default function ContactSection() {
                   <div>
                     <p className="font-medium">Location</p>
                     <p className="text-dark-600 dark:text-gray-400 text-sm">Tamil Computing Lab, Chennai, Tamil Nadu, India</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 flex items-center justify-center bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-full flex-shrink-0">
-                    <Clock className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Hours</p>
-                    <p className="text-dark-600 dark:text-gray-400 text-sm">Monday - Friday: 9AM - 5PM IST</p>
                   </div>
                 </div>
               </div>
@@ -138,12 +128,7 @@ export default function ContactSection() {
                   >
                     <Github className="h-5 w-5" />
                   </a>
-                  <a
-                    href="#" 
-                    className="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-dark-700 text-dark-600 dark:text-gray-300 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                  >
-                    <Twitter className="h-5 w-5" />
-                  </a>
+                  
                   <a
                     href="#" 
                     className="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-dark-700 text-dark-600 dark:text-gray-300 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
