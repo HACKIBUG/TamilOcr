@@ -13,6 +13,16 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
 });
 
+export const images = pgTable("images", {
+  id: serial("id").primaryKey(),
+  fileName: varchar("file_name", { length: 255 }).notNull(),
+  contentType: varchar("content_type", { length: 100 }).notNull(),
+  fileSize: integer("file_size").notNull(),
+  uploadDate: varchar("upload_date", { length: 100 }).notNull(),
+  imageData: text("image_data").notNull(), // Base64 encoded image data
+  imageType: varchar("image_type", { length: 50 }).notNull(), // e.g., "historical", "palm-leaf", etc.
+});
+
 export const documents = pgTable("documents", {
   id: serial("id").primaryKey(),
   fileName: varchar("file_name", { length: 255 }).notNull(),

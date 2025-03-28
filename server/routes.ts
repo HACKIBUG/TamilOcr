@@ -60,7 +60,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Upload a new document
+  // Upload a new image
+  app.post('/api/images/upload', upload.single('file'), async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      // Convert image to base64
+      const imageData = req.file.buffer.toString('base64');
+      
+      const image = await db.insert(images).values({
+        fileName: req.file.originalname,
+        contentType: req.file.mimetype,
+        fileSize: req.file.size,
+        uploadDate: new Date().toISOString(),
+        imageData: imageData,
+        imageType: req.body.imageType || 'historical'
+      }).returning();
+
+      return res.status(201).json(image[0]);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return res.status(500).json({ message: 'Failed to upload image' });
+    }
+  });
+
+// Get image by id
+  app.get('/api/images/:id', async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = await db.select().from(images).where(eq(images.id, id));
+      
+      if (result.length === 0) {
+        return res.status(404).json({ message: 'Image not found' });
+      }
+
+      const image = result[0];
+      return res.status(200).json(image);
+    } catch (error) {
+      console.error('Error fetching image:', error);
+      return res.status(500).json({ message: 'Failed to fetch image' });
+    }
+  });
+
+// Upload a new document
   app.post('/api/documents/upload', upload.single('file'), async (req: Request, res: Response) => {
     try {
       if (!req.file) {
