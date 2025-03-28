@@ -67,6 +67,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'No file uploaded' });
       }
 
+      // Validate file type
+      if (!req.file.mimetype.startsWith('image/')) {
+        return res.status(400).json({ message: 'Only image files are allowed' });
+      }
+
       // Convert image to base64
       const imageData = req.file.buffer.toString('base64');
       
@@ -79,7 +84,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imageType: req.body.imageType || 'historical'
       }).returning();
 
-      return res.status(201).json(image[0]);
+      return res.status(201).json({
+        id: image[0].id,
+        fileName: image[0].fileName,
+        contentType: image[0].contentType,
+        imageType: image[0].imageType,
+        url: `/api/images/${image[0].id}`
+      });
     } catch (error) {
       console.error('Error uploading image:', error);
       return res.status(500).json({ message: 'Failed to upload image' });
