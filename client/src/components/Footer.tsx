@@ -1,4 +1,4 @@
-import { ScanLine, Github } from "lucide-react";
+import { ScanLine, Github, Linkedin, Facebook } from "lucide-react";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -25,6 +25,18 @@ export default function Footer() {
                 className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-dark-700 text-dark-600 dark:text-gray-300 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
               >
                 <Github className="w-4 h-4" />
+              </a>
+              <a 
+                href="#" 
+                className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-dark-700 text-dark-600 dark:text-gray-300 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              >
+                <Linkedin className="w-4 h-4" />
+              </a>
+              <a 
+                href="#" 
+                className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-dark-700 text-dark-600 dark:text-gray-300 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              >
+                <Facebook className="w-4 h-4" />
               </a>
             </div>
           </div>
