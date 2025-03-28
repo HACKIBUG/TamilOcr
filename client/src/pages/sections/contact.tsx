@@ -107,16 +107,6 @@ export default function ContactSection() {
                     <p className="text-dark-600 dark:text-gray-400 text-sm">srsuji13@gmail.com, sakthivelsurekha@gmail.com</p>
                   </div>
                 </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 flex items-center justify-center bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-full flex-shrink-0">
-                    <MapPin className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Location</p>
-                    <p className="text-dark-600 dark:text-gray-400 text-sm">Tamil Computing Lab, Chennai, Tamil Nadu, India</p>
-                  </div>
-                </div>
               </div>
               
               <div className="mt-8">
