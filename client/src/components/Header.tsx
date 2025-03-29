@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { ThemeToggle } from "@/components/ThemeToggle";
+// import { ThemeToggle } from "@/components/ThemeToggle"; //Removed import
 import { Button } from "@/components/ui/button";
 import { ScanLine, Menu } from "lucide-react";
 import { 
@@ -48,7 +48,7 @@ export default function Header() {
             Tamil<span className="text-primary-600 dark:text-primary-400">OCR</span>
           </span>
         </div>
-        
+
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           {navLinks.map((link) => (
@@ -61,10 +61,10 @@ export default function Header() {
             </a>
           ))}
         </nav>
-        
+
         <div className="flex items-center space-x-4">
-          <ThemeToggle />
-          
+          {/*ThemeToggle removed*/}
+
           {/* Mobile Menu */}
           <Sheet>
             <SheetTrigger asChild>
