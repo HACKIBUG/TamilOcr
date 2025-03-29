@@ -1,0 +1,61 @@
+<svg width="800" height="400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with texture -->
+  <rect width="800" height="400" fill="#e8d4b9" />
+  <filter id="noise" x="0%" y="0%" width="100%" height="100%">
+    <feTurbulence baseFrequency="0.05" result="noise" />
+    <feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.05 0" />
+    <feComposite operator="in" in2="SourceGraphic" result="noisy" />
+  </filter>
+  <rect width="800" height="400" filter="url(#noise)" fill-opacity="0.3" />
+  
+  <!-- Decorative border -->
+  <rect x="20" y="20" width="760" height="360" fill="none" stroke="#8D6E63" stroke-width="2" />
+  
+  <!-- Tamil script-like shapes (stylized) -->
+  <g fill="#5D4037">
+    <!-- Row 1 -->
+    <path d="M100,80 Q120,60 140,80 Q160,100 180,80 Q200,60 220,80" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M240,80 Q260,60 280,80 Q300,100 320,80 Q340,60 360,80" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M380,80 Q400,60 420,80 Q440,100 460,80 Q480,60 500,80" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M520,80 Q540,60 560,80 Q580,100 600,80 Q620,60 640,80" stroke="#5D4037" stroke-width="3" fill="none" />
+    
+    <!-- Row 2 -->
+    <path d="M120,120 Q140,100 160,120 Q180,140 200,120 Q220,100 240,120" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M260,120 Q280,100 300,120 Q320,140 340,120 Q360,100 380,120" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M400,120 Q420,100 440,120 Q460,140 480,120 Q500,100 520,120" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M540,120 Q560,100 580,120 Q600,140 620,120 Q640,100 660,120" stroke="#5D4037" stroke-width="3" fill="none" />
+    
+    <!-- Row 3 -->
+    <path d="M100,160 Q120,140 140,160 Q160,180 180,160 Q200,140 220,160" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M240,160 Q260,140 280,160 Q300,180 320,160 Q340,140 360,160" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M380,160 Q400,140 420,160 Q440,180 460,160 Q480,140 500,160" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M520,160 Q540,140 560,160 Q580,180 600,160 Q620,140 640,160" stroke="#5D4037" stroke-width="3" fill="none" />
+    
+    <!-- Row 4 -->
+    <path d="M120,200 Q140,180 160,200 Q180,220 200,200 Q220,180 240,200" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M260,200 Q280,180 300,200 Q320,220 340,200 Q360,180 380,200" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M400,200 Q420,180 440,200 Q460,220 480,200 Q500,180 520,200" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M540,200 Q560,180 580,200 Q600,220 620,200 Q640,180 660,200" stroke="#5D4037" stroke-width="3" fill="none" />
+    
+    <!-- Row 5 -->
+    <path d="M100,240 Q120,220 140,240 Q160,260 180,240 Q200,220 220,240" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M240,240 Q260,220 280,240 Q300,260 320,240 Q340,220 360,240" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M380,240 Q400,220 420,240 Q440,260 460,240 Q480,220 500,240" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M520,240 Q540,220 560,240 Q580,260 600,240 Q620,220 640,240" stroke="#5D4037" stroke-width="3" fill="none" />
+    
+    <!-- Row 6 -->
+    <path d="M120,280 Q140,260 160,280 Q180,300 200,280 Q220,260 240,280" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M260,280 Q280,260 300,280 Q320,300 340,280 Q360,260 380,280" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M400,280 Q420,260 440,280 Q460,300 480,280 Q500,260 520,280" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M540,280 Q560,260 580,280 Q600,300 620,280 Q640,260 660,280" stroke="#5D4037" stroke-width="3" fill="none" />
+    
+    <!-- Row 7 -->
+    <path d="M100,320 Q120,300 140,320 Q160,340 180,320 Q200,300 220,320" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M240,320 Q260,300 280,320 Q300,340 320,320 Q340,300 360,320" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M380,320 Q400,300 420,320 Q440,340 460,320 Q480,300 500,320" stroke="#5D4037" stroke-width="3" fill="none" />
+    <path d="M520,320 Q540,300 560,320 Q580,340 600,320 Q620,300 640,320" stroke="#5D4037" stroke-width="3" fill="none" />
+  </g>
+  
+  <!-- Text label -->
+  <text x="400" y="380" text-anchor="middle" fill="#5D4037" font-family="serif" font-size="14">Tamil Historical Manuscript</text>
+</svg>

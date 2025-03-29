@@ -7,8 +7,6 @@ import { Play, Upload, Info } from "lucide-react";
 const demoTypes = [
   { id: "historical", name: "Historical Manuscript" },
   { id: "palm", name: "Palm Leaf" },
-  { id: "copper", name: "Copper Plate" },
-  { id: "stone", name: "Stone Inscription" }
 ];
 
 const demoSteps = [

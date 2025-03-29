@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { ThemeToggle } from "./ThemeToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
-import { ScanLine, Menu, X } from "lucide-react";
+import { ScanLine, Menu } from "lucide-react";
 import { 
   Sheet,
   SheetContent,
@@ -40,16 +40,14 @@ export default function Header() {
   return (
     <header className={headerClasses}>
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
-        <Link href="/">
-          <a className="flex items-center space-x-2">
-            <span className="text-primary-600 dark:text-primary-400 text-3xl">
-              <ScanLine />
-            </span>
-            <span className="font-bold text-xl">
-              Tamil<span className="text-primary-600 dark:text-primary-400">OCR</span>
-            </span>
-          </a>
-        </Link>
+        <div className="flex items-center space-x-2 cursor-pointer" onClick={() => window.location.href = '/'}>
+          <span className="text-primary-600 dark:text-primary-400 text-3xl">
+            <ScanLine />
+          </span>
+          <span className="font-bold text-xl">
+            Tamil<span className="text-primary-600 dark:text-primary-400">OCR</span>
+          </span>
+        </div>
         
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
