@@ -377,8 +377,6 @@ export default function UploadProcessSection() {
                           </Label>
                         </div>
                       </RadioGroup>
-
-                     
                     </div>
                   </div>
                 </div>
@@ -387,7 +385,7 @@ export default function UploadProcessSection() {
                   <Button
                     onClick={handleProcess}
                     disabled={!file || processing}
-                    className="bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 shadow-lg shadow-primary-600/20 dark:shadow-primary-500/20 text-black dark:text-white"
+                    className="bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 shadow-lg shadow-primary-600/20 dark:shadow-primary-500/20 text-black-600"
                   >
                     {processing ? (
                       <>

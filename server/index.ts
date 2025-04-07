@@ -39,10 +39,15 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    // Initialize database
+    // Initialize database (may fail gracefully if no DB connection)
     log("Initializing database...");
-    await initializeDatabase();
-    log("Database initialized successfully");
+    try {
+      await initializeDatabase();
+      log("Database initialized successfully");
+    } catch (dbError) {
+      log("Database initialization failed, continuing with in-memory storage");
+      // Continue execution, don't exit
+    }
     
     const server = await registerRoutes(app);
 
@@ -51,7 +56,7 @@ app.use((req, res, next) => {
       const message = err.message || "Internal Server Error";
 
       res.status(status).json({ message });
-      throw err;
+      console.error(err);
     });
 
     // importantly only setup vite in development and after

@@ -23,31 +23,42 @@ export interface IStorage {
 export class PostgresStorage implements IStorage {
   // User methods
   async getUser(id: number): Promise<User | undefined> {
+    if (!db) return undefined;
     const result = await db.select().from(users).where(eq(users.id, id));
     return result.length > 0 ? result[0] : undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
+    if (!db) return undefined;
     const result = await db.select().from(users).where(eq(users.username, username));
     return result.length > 0 ? result[0] : undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    if (!db) {
+      throw new Error("Database not available");
+    }
     const result = await db.insert(users).values(insertUser).returning();
     return result[0];
   }
 
   // Document methods
   async getDocument(id: number): Promise<Document | undefined> {
+    if (!db) return undefined;
     const result = await db.select().from(documents).where(eq(documents.id, id));
     return result.length > 0 ? result[0] : undefined;
   }
 
   async getAllDocuments(): Promise<Document[]> {
+    if (!db) return [];
     return await db.select().from(documents);
   }
 
   async createDocument(document: InsertDocument): Promise<Document> {
+    if (!db) {
+      throw new Error("Database not available");
+    }
+    
     // Ensure status is set
     const docWithStatus = {
       ...document,
@@ -59,6 +70,8 @@ export class PostgresStorage implements IStorage {
   }
 
   async updateDocument(id: number, data: UpdateDocument): Promise<Document | undefined> {
+    if (!db) return undefined;
+    
     const result = await db.update(documents)
       .set(data)
       .where(eq(documents.id, id))
@@ -68,6 +81,8 @@ export class PostgresStorage implements IStorage {
   }
 
   async deleteDocument(id: number): Promise<boolean> {
+    if (!db) return false;
+    
     const result = await db.delete(documents).where(eq(documents.id, id)).returning();
     return result.length > 0;
   }
@@ -266,5 +281,5 @@ export class MemStorage implements IStorage {
   }
 }
 
-// Export the PostgreSQL storage implementation
-export const storage = new PostgresStorage();
+// Export the in-memory storage implementation (for development and testing)
+export const storage = new MemStorage();

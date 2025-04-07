@@ -143,7 +143,7 @@ export default function DemoSection() {
             <p className="text-dark-600 dark:text-gray-300 mb-6">Ready to try the system with your own documents?</p>
             <Button 
               size="lg" 
-              className="bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 shadow-lg shadow-primary-600/20 dark:shadow-primary-500/20"
+              className="bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 shadow-lg shadow-primary-600/20 dark:shadow-primary-500/20 text-black"
               asChild
             >
               <a href="#process">

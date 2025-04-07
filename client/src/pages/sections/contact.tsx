@@ -104,7 +104,8 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <p className="font-medium">Email</p>
-                    <p className="text-dark-600 dark:text-gray-400 text-sm">srsuji13@gmail.com, sakthivelsurekha@gmail.com</p>
+                    <p className="text-dark-600 dark:text-gray-400 text-sm">sakthivelsurekha@gmail.com,
+    srsuji13@gmail.com </p>
                   </div>
                 </div>
               </div>
@@ -227,7 +228,7 @@ export default function ContactSection() {
                     <Button 
                       type="submit" 
                       disabled={submitStatus === 'pending'}
-                      className="bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 shadow-lg shadow-primary-600/20 dark:shadow-primary-500/20"
+                      className="bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 shadow-lg shadow-primary-600/20 dark:shadow-primary-500/20 text-black"
                     >
                       {submitStatus === 'pending' ? (
                         <>
