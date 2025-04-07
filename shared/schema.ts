@@ -29,6 +29,7 @@ export const documents = pgTable("documents", {
   contentType: varchar("content_type", { length: 100 }).notNull(),
   fileSize: integer("file_size").notNull(),
   uploadDate: varchar("upload_date", { length: 100 }).notNull(),
+  filePath: text("file_path"), // Path to the stored file on disk
   status: varchar("status", { length: 20 }).notNull().default("uploaded"),
   enhancementEnabled: boolean("enhancement_enabled").default(true),
   spellCheckEnabled: boolean("spell_check_enabled").default(true),
@@ -65,7 +66,7 @@ export const processingResultSchema = z.object({
   stages: z.array(
     z.object({
       name: z.string(),
-      status: z.enum(["completed", "failed"]),
+      status: z.enum(["completed", "failed", "in_progress", "pending"]),
       progress: z.number(),
       timeMs: z.number(),
     })

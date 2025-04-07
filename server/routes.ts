@@ -1,16 +1,45 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertDocumentSchema, processingResultSchema } from "@shared/schema";
+import { insertDocumentSchema, processingResultSchema, images } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
 import { fromZodError } from "zod-validation-error";
 import path from "path";
 import fs from "fs";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
+import { log } from "./vite";
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  log('Created uploads directory', 'app');
+}
+
+// Create notebooks directory if it doesn't exist
+const notebooksDir = path.join(process.cwd(), 'notebooks');
+if (!fs.existsSync(notebooksDir)) {
+  fs.mkdirSync(notebooksDir, { recursive: true });
+  log('Created notebooks directory', 'app');
+}
+
+// Set up multer for file storage
+const diskStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    // Generate a unique filename
+    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  }
+});
 
 // Set up multer for file uploads
 const upload = multer({
-  storage: multer.memoryStorage(),
+  storage: diskStorage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
@@ -72,8 +101,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Only image files are allowed' });
       }
 
-      // Convert image to base64
-      const imageData = req.file.buffer.toString('base64');
+      // Get the file path instead of using buffer (which doesn't exist anymore)
+      const filePath = req.file.path;
+      let imageData;
+      
+      try {
+        // Read the file and convert to base64
+        const fileData = fs.readFileSync(filePath);
+        imageData = fileData.toString('base64');
+      } catch (err) {
+        console.error('Error reading uploaded file:', err);
+        return res.status(500).json({ message: 'Failed to process uploaded image' });
+      }
+      
+      // Check if db is available
+      if (!db) {
+        return res.status(500).json({ 
+          message: 'Database not available, using in-memory storage',
+          fileName: req.file.originalname,
+          filePath: filePath 
+        });
+      }
       
       const image = await db.insert(images).values({
         fileName: req.file.originalname,
@@ -101,6 +149,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/images/:id', async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      
+      if (!db) {
+        return res.status(500).json({ message: 'Database not available, using in-memory storage' });
+      }
+      
       const result = await db.select().from(images).where(eq(images.id, id));
       
       if (result.length === 0) {
@@ -122,11 +175,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'No file uploaded' });
       }
 
+      // Get the file path of the saved file
+      const filePath = req.file.path;
+      
       const parsedData = insertDocumentSchema.parse({
         fileName: req.file.originalname,
         contentType: req.file.mimetype,
         fileSize: req.file.size,
         uploadDate: new Date().toISOString(),
+        filePath: filePath,
         status: 'uploaded',
         enhancementEnabled: req.body.enhancementEnabled === 'true',
         spellCheckEnabled: req.body.spellCheckEnabled === 'true',
@@ -137,6 +194,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const document = await storage.createDocument(parsedData);
+      
+      log(`Document uploaded and saved at: ${filePath}`, 'app');
+      
       return res.status(201).json(document);
     } catch (error) {
       console.error('Error uploading document:', error);
@@ -215,6 +275,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Upload a notebook file for OCR
+  app.post('/api/notebook/upload', upload.single('file'), async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      // Check file type - should be .ipynb
+      if (!req.file.originalname.endsWith('.ipynb')) {
+        return res.status(400).json({ message: 'Invalid file type. Only Jupyter notebook (.ipynb) files are allowed.' });
+      }
+
+      // Get the path to the uploaded file
+      const sourcePath = req.file.path;
+      
+      // Create a destination path in the notebooks directory
+      const destPath = path.join(notebooksDir, 'ocr_notebook.ipynb');
+      
+      // Copy the file to the notebooks directory
+      fs.copyFileSync(sourcePath, destPath);
+      
+      // Update OCR module to use the new notebook
+      const { setNotebookPath } = await import('./ocr');
+      setNotebookPath(destPath);
+      
+      log(`Notebook uploaded and saved at: ${destPath}`, 'app');
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Notebook uploaded and installed successfully',
+        path: destPath
+      });
+    } catch (error) {
+      console.error('Error uploading notebook:', error);
+      return res.status(500).json({ message: 'Failed to upload notebook' });
+    }
+  });
+  
   // Submit contact form
   app.post('/api/contact', async (req: Request, res: Response) => {
     try {
