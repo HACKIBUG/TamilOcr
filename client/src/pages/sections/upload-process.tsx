@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { WandSparkles, Copy, Edit, Download } from "lucide-react";
+import { WandSparkles, Copy, Edit, Download, Upload, Book } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
@@ -14,6 +14,7 @@ import { ProcessingResult } from "@shared/schema";
 export default function UploadProcessSection() {
   const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
+  const [notebookFile, setNotebookFile] = useState<File | null>(null);
   const [enhancementEnabled, setEnhancementEnabled] = useState(true);
   const [spellCheckEnabled, setSpellCheckEnabled] = useState(true);
   const [layoutAnalysisEnabled, setLayoutAnalysisEnabled] = useState(true);
@@ -21,6 +22,8 @@ export default function UploadProcessSection() {
   const [outputFormat, setOutputFormat] = useState("txt");
   const [confidenceThreshold, setConfidenceThreshold] = useState(80);
   const [processing, setProcessing] = useState(false);
+  const [uploadingNotebook, setUploadingNotebook] = useState(false);
+  const [notebookUploaded, setNotebookUploaded] = useState(false);
   const [result, setResult] = useState<ProcessingResult | null>(null);
   const [uploadedDocId, setUploadedDocId] = useState<number | null>(null);
   const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
@@ -103,6 +106,35 @@ export default function UploadProcessSection() {
       setProcessing(false);
     },
   });
+  
+  // Upload notebook mutation
+  const uploadNotebookMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const response = await apiRequest(
+        "POST",
+        "/api/notebook/upload",
+        formData,
+      );
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Model Uploaded",
+        description: "Your Tamil OCR model notebook was successfully uploaded and installed.",
+      });
+      setNotebookUploaded(true);
+      setUploadingNotebook(false);
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Model Upload Failed",
+        description:
+          error instanceof Error ? error.message : "Failed to upload the OCR model notebook.",
+      });
+      setUploadingNotebook(false);
+    },
+  });
 
   // Handle file change
   const handleFileChange = (selectedFile: File | null) => {
@@ -110,6 +142,36 @@ export default function UploadProcessSection() {
     // Reset results when new file is selected
     setResult(null);
     setUploadedDocId(null);
+  };
+  
+  // Handle notebook file change
+  const handleNotebookFileChange = (selectedFile: File | null) => {
+    setNotebookFile(selectedFile);
+    setNotebookUploaded(false);
+  };
+  
+  // Handle notebook upload
+  const handleUploadNotebook = async () => {
+    if (!notebookFile) {
+      toast({
+        variant: "destructive",
+        title: "No Notebook Selected",
+        description: "Please select a notebook file to upload.",
+      });
+      return;
+    }
+    
+    setUploadingNotebook(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append("file", notebookFile);
+      
+      await uploadNotebookMutation.mutateAsync(formData);
+    } catch (error) {
+      console.error("Error uploading notebook:", error);
+      setUploadingNotebook(false);
+    }
   };
 
   // Handle process button click
@@ -241,6 +303,12 @@ export default function UploadProcessSection() {
                     className="data-[state=active]:border-b-2 data-[state=active]:border-primary-600 data-[state=active]:text-primary-600 rounded-none px-2 py-2 font-medium bg-gray-100"
                   >
                     Document Processing
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="model"
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary-600 data-[state=active]:text-primary-600 rounded-none px-2 py-2 font-medium bg-gray-100"
+                  >
+                    Upload Model
                   </TabsTrigger>
                   <TabsTrigger
                     value="batch"
@@ -515,6 +583,94 @@ export default function UploadProcessSection() {
                     </div>
                   </div>
                 )}
+              </TabsContent>
+              
+              <TabsContent value="model" className="p-6">
+                <div className="text-center py-6">
+                  <h3 className="text-xl font-medium mb-2">Upload Your Tamil OCR Model</h3>
+                  <p className="text-dark-600 dark:text-gray-400 mb-8">
+                    Upload your trained Jupyter notebook (.ipynb) to use your custom OCR model for Tamil text recognition
+                  </p>
+                </div>
+                
+                <div className="max-w-2xl mx-auto">
+                  <div className="bg-gray-50 dark:bg-dark-900 rounded-lg p-6 mb-6">
+                    <div className="flex items-center mb-4">
+                      <Book className="h-6 w-6 mr-2 text-primary-600 dark:text-primary-400" />
+                      <h4 className="font-medium">Model Requirements</h4>
+                    </div>
+                    
+                    <ul className="text-sm space-y-2 text-dark-600 dark:text-gray-400 mb-6">
+                      <li>• Your notebook must be in Jupyter (.ipynb) format</li>
+                      <li>• Notebook should contain all necessary preprocessing steps</li>
+                      <li>• Make sure your notebook has a function named <code className="bg-gray-200 dark:bg-dark-700 px-1 py-0.5 rounded">process_image</code> that accepts an image path</li>
+                      <li>• The OCR function should return extracted text as JSON with confidence scores</li>
+                      <li>• Required libraries: PyTorch/TensorFlow, OpenCV, pytesseract (already installed)</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="mb-6">
+                    <FileUpload
+                      value={notebookFile}
+                      onChange={handleNotebookFileChange}
+                      onError={handleFileError}
+                      acceptedFileTypes={["application/json", ".ipynb"]}
+                      maxSize={50 * 1024 * 1024} // 50MB
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleUploadNotebook}
+                      disabled={!notebookFile || uploadingNotebook}
+                      className="bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 shadow-lg shadow-primary-600/20 dark:shadow-primary-500/20 text-black-600"
+                    >
+                      {uploadingNotebook ? (
+                        <>
+                          <svg
+                            className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-2 h-5 w-5" /> Upload Notebook
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  
+                  {notebookUploaded && (
+                    <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <div className="flex items-center text-green-700 dark:text-green-400">
+                        <svg className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="font-medium">Model successfully uploaded and installed!</span>
+                      </div>
+                      <p className="mt-2 text-sm text-green-600 dark:text-green-500">
+                        Your custom Tamil OCR model is now ready to use. Switch to the "Document Processing" tab to test it with your documents.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </TabsContent>
 
               <TabsContent value="batch" className="p-6">
