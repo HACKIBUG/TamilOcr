@@ -2,22 +2,32 @@ import React, { useState, useRef } from "react";
 import { UploadCloud } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface FileUploadProps extends React.HTMLAttributes<HTMLDivElement> {
+// Define a custom interface without extending HTMLAttributes
+interface FileUploadProps {
   value?: File | null;
   onChange?: (file: File | null) => void;
   onError?: (error: string) => void;
   acceptedFileTypes?: string[];
   maxSize?: number; // in bytes
+  className?: string;
+  // Add any other div props we explicitly use
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
+  onDragOver?: React.DragEventHandler<HTMLDivElement>;
+  onDragLeave?: React.DragEventHandler<HTMLDivElement>;
+  onDrop?: React.DragEventHandler<HTMLDivElement>;
 }
 
 export function FileUpload({
   value,
   onChange,
   onError,
-  acceptedFileTypes = ["image/jpeg", "image/png", "image/gif", "application/pdf"],
+  acceptedFileTypes = ["image/jpeg", "image/png", "image/gif", "image/tiff", "application/pdf"],
   maxSize = 10 * 1024 * 1024, // 10MB
   className,
-  ...props
+  onClick,
+  onDragOver,
+  onDragLeave,
+  onDrop
 }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -86,7 +96,6 @@ export function FileUpload({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       onClick={handleClick}
-      {...props}
     >
       <input
         type="file"
@@ -102,7 +111,7 @@ export function FileUpload({
         <div>
           <p className="font-medium">Drag your document here or click to browse</p>
           <p className="text-sm text-dark-500 dark:text-gray-400 mt-1">
-            Support for JPG, PNG, PDF with Tamil text (max {Math.round(maxSize / 1024 / 1024)}MB)
+            Support for JPG, PNG, TIFF, PDF with Tamil text (max {Math.round(maxSize / 1024 / 1024)}MB)
           </p>
         </div>
         <div>
