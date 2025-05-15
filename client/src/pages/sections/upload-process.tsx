@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FileUpload } from "@/components/ui/file-upload";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { WandSparkles, Copy, Edit, Download } from "lucide-react";
+import { WandSparkles, Copy, Edit, Download, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 import { ProcessingResult } from "@shared/schema";
+import { createWorker } from 'tesseract.js';
 
 export default function UploadProcessSection() {
   const { toast } = useToast();
@@ -24,6 +25,8 @@ export default function UploadProcessSection() {
   const [result, setResult] = useState<ProcessingResult | null>(null);
   const [uploadedDocId, setUploadedDocId] = useState<number | null>(null);
   const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
+  const [tesseractProcessing, setTesseractProcessing] = useState(false);
+  const [tesseractProgress, setTesseractProgress] = useState(0);
 
   // Handle file upload error
   const handleFileError = (error: string) => {
@@ -104,12 +107,105 @@ export default function UploadProcessSection() {
     },
   });
 
+  // Process image with Tesseract.js directly in the browser
+  const processWithTesseract = useCallback(async () => {
+    if (!file) {
+      toast({
+        variant: "destructive",
+        title: "No File Selected",
+        description: "Please select a file to process.",
+      });
+      return;
+    }
+
+    try {
+      setTesseractProcessing(true);
+      setTesseractProgress(0);
+
+      // Create a worker
+      const worker = await createWorker({
+        logger: (m) => {
+          if (m.status === 'recognizing text') {
+            setTesseractProgress(parseInt((m.progress * 100).toFixed(0)));
+          }
+        },
+      });
+      
+      // Load language data (tamil)
+      // Tamil language is 'tam' in Tesseract
+      await worker.loadLanguage('eng+tam');
+      await worker.initialize('eng+tam');
+
+      // Set recognition parameters
+      await worker.setParameters({
+        tessedit_pageseg_mode: '1', // Automatic page segmentation with OSD
+        preserve_interword_spaces: '1',
+      });
+
+      // Convert file to image URL
+      const imageUrl = URL.createObjectURL(file);
+      
+      // Recognize text from image
+      const { data } = await worker.recognize(imageUrl);
+      
+      // Create result in same format as server response
+      const tesseractResult: ProcessingResult = {
+        documentId: 0, // Client-side processing doesn't have a document ID
+        extractedText: data.text,
+        confidence: data.confidence,
+        wordCount: data.text.split(' ').length,
+        characterCount: data.text.length,
+        language: 'tam', // Assuming Tamil
+        processingTime: 0, // Not tracked for client-side
+        enhancementApplied: enhancementEnabled,
+        spellCheckApplied: spellCheckEnabled,
+        layoutAnalysisApplied: layoutAnalysisEnabled,
+        metadata: {
+          hocrOutput: data.hocr || '',
+          tsv: data.tsv || '',
+          wordBoundingBoxes: [],
+        }
+      };
+      
+      // Clean up worker
+      await worker.terminate();
+      
+      // Clean up temporary URL
+      URL.revokeObjectURL(imageUrl);
+      
+      // Set result
+      setResult(tesseractResult);
+      
+      toast({
+        title: "Processing Complete",
+        description: "Text extraction was completed successfully using Tesseract.js.",
+      });
+    } catch (error) {
+      console.error("Tesseract processing error:", error);
+      toast({
+        variant: "destructive",
+        title: "Processing Failed",
+        description: error instanceof Error ? error.message : "Failed to process image with Tesseract.js",
+      });
+    } finally {
+      setTesseractProcessing(false);
+    }
+  }, [file, enhancementEnabled, spellCheckEnabled, layoutAnalysisEnabled, toast]);
+
   // Handle file change
   const handleFileChange = (selectedFile: File | null) => {
     setFile(selectedFile);
     // Reset results when new file is selected
     setResult(null);
     setUploadedDocId(null);
+    
+    // Create preview URL for the image
+    if (selectedFile) {
+      const preview = URL.createObjectURL(selectedFile);
+      setFilePreviewUrl(preview);
+    } else {
+      setFilePreviewUrl(null);
+    }
   };
 
   // Handle process button click
