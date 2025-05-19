@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 import { ProcessingResult } from "@shared/schema";
-import { createWorker } from 'tesseract.js';
+import { createWorker, PSM } from 'tesseract.js';
 
 export default function UploadProcessSection() {
   const { toast } = useToast();
@@ -138,7 +138,7 @@ export default function UploadProcessSection() {
 
       // Set recognition parameters
       await worker.setParameters({
-        tessedit_pageseg_mode: '1', // Automatic page segmentation with OSD
+        tessedit_pageseg_mode: PSM.AUTO_OSD, // Automatic page segmentation with OSD
         preserve_interword_spaces: '1',
       });
 
@@ -154,7 +154,7 @@ export default function UploadProcessSection() {
         extractedText: data.text,
         confidence: data.confidence,
         wordCount: data.text.split(' ').length,
-        characterCount: data.text.length,
+        charCount: data.text.length,
         language: 'tam', // Assuming Tamil
         processingTime: 0, // Not tracked for client-side
         enhancementApplied: enhancementEnabled,

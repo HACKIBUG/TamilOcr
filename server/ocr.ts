@@ -29,12 +29,12 @@ export async function processImageWithOCR(imagePath: string): Promise<Processing
     const startTime = Date.now();
     
     // Execute the Python script
-    const pythonPath = 'python3'; // or 'python' depending on your setup
+    const pythonPath = 'C:\\Users\\srsuj\\AppData\\Local\\Programs\\Python\\Python313\\python.exe'; // or 'python' depending on your setup
     const scriptPath = path.join(process.cwd(), 'python_ocr/ocr_wrapper.py');
     
     log(`Executing OCR script with notebook: ${notebookPath} and image: ${imagePath}`, "ocr");
     
-    const command = `${pythonPath} ${scriptPath} "${notebookPath}" "${imagePath}"`;
+    const command = `${pythonPath} "${scriptPath}" "${notebookPath}" "${imagePath}"`;
     const { stdout, stderr } = await execPromise(command);
     
     if (stderr) {

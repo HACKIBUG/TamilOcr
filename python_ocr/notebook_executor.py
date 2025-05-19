@@ -48,13 +48,17 @@ class NotebookOCRExecutor:
                 # Create a modified version of the notebook with the image path
                 nb_copy = nbformat.from_dict(self.notebook.copy())
                 
+
+                # Convert image path to safe format (avoid unicode escape errors)
+                abs_image_path = os.path.abspath(image_path).replace('\\', '/')  # Replace backslashes with forward slashes
+
                 # Insert the image path as a variable in the first cell (using absolute path)
                 abs_image_path = os.path.abspath(image_path)
                 image_cell = {
                     "cell_type": "code",
                     "execution_count": None,
                     "metadata": {},
-                    "source": f"IMAGE_PATH = '{abs_image_path}'",
+                    "source": f"IMAGE_PATH = r'{abs_image_path}'",
                     "outputs": []
                 }
                 nb_copy.cells.insert(0, nbformat.from_dict(image_cell))

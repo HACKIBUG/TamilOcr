@@ -8,6 +8,13 @@ import sys
 import json
 import traceback
 import pytesseract
+
+# Point to tesseract binary
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+# Set the environment variable correctly
+os.environ['TESSDATA_PREFIX'] = r"C:\Program Files\Tesseract-OCR\tessdata"
+
 from PIL import Image
 import cv2
 import numpy as np

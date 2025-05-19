@@ -62,7 +62,11 @@ export const processingResultSchema = z.object({
   extractedText: z.string(),
   confidence: z.number(),
   processingTime: z.number(),
-  charCount: z.number(),
+  charCount: z.number(),wordCount: z.number().optional(),                
+  language: z.string().optional(),                 
+  enhancementApplied: z.boolean().optional(),      
+  spellCheckApplied: z.boolean().optional(),       
+  layoutAnalysisApplied: z.boolean().optional(),   
   stages: z.array(
     z.object({
       name: z.string(),
